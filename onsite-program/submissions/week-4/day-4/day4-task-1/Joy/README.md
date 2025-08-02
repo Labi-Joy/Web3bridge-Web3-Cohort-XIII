@@ -1,0 +1,2 @@
+Deployed address: 0xEf3c0c58F0188Dd05d368FF5A28D9bF77850AD73
+Verify contract here: https://sepolia-blockscout.lisk.com/address/0xEf3c0c58F0188Dd05d368FF5A28D9bF77850AD73#code
