@@ -1,0 +1,2 @@
+Deployed contract: 0x34c3DcD8F1BEC36Aec75A4A20edcCbC7fd594f92
+Verified account: https://sepolia-blockscout.lisk.com/address/0x34c3DcD8F1BEC36Aec75A4A20edcCbC7fd594f92#code
