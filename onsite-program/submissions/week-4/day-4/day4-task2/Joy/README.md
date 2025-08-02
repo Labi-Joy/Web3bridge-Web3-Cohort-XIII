@@ -1,0 +1,2 @@
+Deployed account: 0x03135136e2F106540f53487F124933BAc4A4A631
+Verify here: https://sepolia-blockscout.lisk.com/address/0x03135136e2F106540f53487F124933BAc4A4A631#code
