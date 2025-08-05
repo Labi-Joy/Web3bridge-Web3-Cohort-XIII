@@ -381,6 +381,9 @@ describe("StaffManagement Deployment", function () {
             
             const tx = await staffManagement.withdraw_funds();
             const receipt = await tx.wait();
+            if (!receipt) {
+                throw new Error("Transaction receipt is null");
+            }
             const gasUsed = receipt.gasUsed * receipt.gasPrice;
             
             const finalAdminBalance = await hre.ethers.provider.getBalance(admin.address);
