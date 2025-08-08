@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.28;
+pragma solidity ^0.8.30;
 
 contract MultiSig {
    address[] public owners; //since 3 people have to sign the contract

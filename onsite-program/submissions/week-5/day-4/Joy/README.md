@@ -1,1 +1,2 @@
 Deployed address: 0x75720D43bA0547F84D7DFd6e562868B688fBcFE5
+Verify multisig contract here: https://sepolia-blockscout.lisk.com/address/0x75720D43bA0547F84D7DFd6e562868B688fBcFE5#code
