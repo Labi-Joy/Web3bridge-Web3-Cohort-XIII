@@ -75,8 +75,8 @@ contract MultiSig {
         require(_confirmedtxs > 0, "Required confirmations must be greater than 0");
         require(_confirmedtxs <= _owners.length, "Required confirmations cannot exceed number of owners");
         
-        // Check for duplicate owners
-        for(uint i = 0; i < _owners.length; i++) {
+        
+        for(uint i = 0; i < _owners.length; i++) {    //to make sure there are no duplicate owners.
             require(_owners[i] != address(0), "Invalid owner address");
             for(uint j = i + 1; j < _owners.length; j++) {
                 require(_owners[i] != _owners[j], "Duplicate owner");
