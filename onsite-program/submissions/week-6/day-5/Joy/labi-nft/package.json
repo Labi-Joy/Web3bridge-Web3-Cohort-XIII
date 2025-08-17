@@ -1,0 +1,27 @@
+{
+  "name": "labi-nft",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test",
+    "test:ipfs": "npx hardhat test test/IPFSTimeNFT.js",
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat run scripts/deploy.js",
+    "deploy:ipfs": "npx hardhat run scripts/deploy-ipfs.js",
+    "deploy:localhost": "npx hardhat run scripts/deploy.js --network localhost",
+    "deploy:ipfs:localhost": "npx hardhat run scripts/deploy-ipfs.js --network localhost",
+    "extract-svg": "npx hardhat run scripts/extract-svg.js --network localhost",
+    "node": "npx hardhat node"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0"
+  }
+}

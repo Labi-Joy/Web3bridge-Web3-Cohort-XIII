@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract Dynamic SVG from NFT</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .container { margin: 20px 0; }
+        input, button { margin: 10px 0; padding: 10px; width: 100%; }
+        .result { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        .svg-display { border: 2px solid #ddd; padding: 20px; margin: 20px 0; text-align: center; }
+        textarea { height: 200px; font-family: monospace; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Extract Dynamic SVG from NFT Contract</h1>
+    
+    <div class="container">
+        <h3>1. Connect to Contract</h3>
+        <input type="text" id="contractAddress" placeholder="Contract Address" value="0x5FbDB2315678afecb367f032d93F642f64180aa3">
+        <input type="number" id="tokenId" placeholder="Token ID" value="0">
+        <button onclick="connectContract()">Connect to Contract</button>
+        <div id="connectionResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h3>2. Extract SVG</h3>
+        <button onclick="extractSVG()" id="extractBtn" disabled>Extract Current SVG</button>
+        <div id="svgResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h3>3. View SVG</h3>
+        <div id="svgDisplay" class="svg-display" style="display:none;">
+            <h4>Live SVG Preview:</h4>
+            <div id="svgContainer"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>4. Download SVG</h3>
+        <button onclick="downloadSVG()" id="downloadBtn" disabled>Download SVG File</button>
+        <button onclick="downloadHTML()" id="downloadHTMLBtn" disabled>Download HTML Viewer</button>
+    </div>
+
+    <div class="container">
+        <h3>5. Raw SVG Code</h3>
+        <textarea id="svgCode" placeholder="SVG code will appear here..." readonly></textarea>
+    </div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script>
+        let contract;
+        let currentSVG = '';
+        
+        const contractABI = [
+            "function tokenURI(uint256 tokenId) view returns (string)",
+            "function name() view returns (string)",
+            "function symbol() view returns (string)"
+        ];
+
+        async function connectContract() {
+            const contractAddress = document.getElementById('contractAddress').value;
+            
+            if (!contractAddress) {
+                showResult('connectionResult', 'Please enter contract address', 'error');
+                return;
+            }
+
+            try {
+                if (typeof window.ethereum !== 'undefined') {
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    contract = new ethers.Contract(contractAddress, contractABI, provider);
+                    
+                    const name = await contract.name();
+                    const symbol = await contract.symbol();
+                    
+                    showResult('connectionResult', `
+                        ✅ Connected to contract!<br>
+                        <strong>Name:</strong> ${name}<br>
+                        <strong>Symbol:</strong> ${symbol}<br>
+                        <strong>Address:</strong> ${contractAddress}
+                    `, 'success');
+                    
+                    document.getElementById('extractBtn').disabled = false;
+                } else {
+                    showResult('connectionResult', 'Please install MetaMask or use localhost', 'error');
+                }
+            } catch (error) {
+                showResult('connectionResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function extractSVG() {
+            const tokenId = document.getElementById('tokenId').value;
+            
+            try {
+                showResult('svgResult', 'Extracting SVG from contract...', 'success');
+                
+                const tokenURI = await contract.tokenURI(tokenId);
+                console.log('Token URI:', tokenURI);
+                
+                // Decode JSON
+                const base64Json = tokenURI.split('data:application/json;base64,')[1];
+                const jsonData = JSON.parse(atob(base64Json));
+                
+                // Extract SVG
+                const svgDataUri = jsonData.image;
+                const base64Svg = svgDataUri.split('data:image/svg+xml;base64,')[1];
+                currentSVG = atob(base64Svg);
+                
+                // Display results
+                showResult('svgResult', `
+                    ✅ SVG extracted successfully!<br>
+                    <strong>NFT Name:</strong> ${jsonData.name}<br>
+                    <strong>Description:</strong> ${jsonData.description}<br>
+                    <strong>Generated at:</strong> ${new Date().toLocaleString()}
+                `, 'success');
+                
+                // Show SVG
+                document.getElementById('svgContainer').innerHTML = currentSVG;
+                document.getElementById('svgDisplay').style.display = 'block';
+                
+                // Show code
+                document.getElementById('svgCode').value = currentSVG;
+                
+                // Enable download buttons
+                document.getElementById('downloadBtn').disabled = false;
+                document.getElementById('downloadHTMLBtn').disabled = false;
+                
+            } catch (error) {
+                showResult('svgResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function downloadSVG() {
+            if (!currentSVG) return;
+            
+            const blob = new Blob([currentSVG], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dynamic-nft-${Date.now()}.svg`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadHTML() {
+            if (!currentSVG) return;
+            
+            const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Time NFT</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .svg-container { margin: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Dynamic Time NFT</h1>
+    <p>Extracted on: ${new Date().toLocaleString()}</p>
+    <div class="svg-container">
+        ${currentSVG}
+    </div>
+    <p><strong>Note:</strong> This shows the blockchain time when the SVG was generated.</p>
+</body>
+</html>`;
+            
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dynamic-nft-viewer-${Date.now()}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+
+        // Auto-connect if on localhost
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            setTimeout(() => {
+                // Auto-fill localhost RPC
+                document.getElementById('contractAddress').value = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+            }, 100);
+        }
+    </script>
+</body>
+</html>

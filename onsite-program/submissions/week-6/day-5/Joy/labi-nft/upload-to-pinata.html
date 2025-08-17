@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload to Pinata IPFS</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { margin: 20px 0; }
+        input, button { margin: 10px 0; padding: 10px; width: 100%; }
+        .result { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Upload NFT Images to Pinata IPFS</h1>
+    
+    <div class="container">
+        <h3>1. Enter Your Pinata JWT Token</h3>
+        <input type="password" id="jwtToken" placeholder="Enter your Pinata JWT token">
+        <small>Get this from Pinata Dashboard → API Keys</small>
+    </div>
+
+    <div class="container">
+        <h3>2. Upload Image</h3>
+        <input type="file" id="imageFile" accept="image/*">
+        <button onclick="uploadImage()">Upload Image to IPFS</button>
+        <div id="imageResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h3>3. Create & Upload Metadata</h3>
+        <input type="text" id="nftName" placeholder="NFT Name (e.g., 'Awesome NFT #1')">
+        <input type="text" id="nftDescription" placeholder="NFT Description">
+        <input type="text" id="imageHash" placeholder="Image IPFS Hash (from step 2)">
+        <button onclick="uploadMetadata()">Upload Metadata to IPFS</button>
+        <div id="metadataResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h3>4. Final Result</h3>
+        <div id="finalResult" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        async function uploadImage() {
+            const jwt = document.getElementById('jwtToken').value;
+            const fileInput = document.getElementById('imageFile');
+            const file = fileInput.files[0];
+            
+            if (!jwt || !file) {
+                showResult('imageResult', 'Please enter JWT token and select an image', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('pinataMetadata', JSON.stringify({
+                name: file.name
+            }));
+
+            try {
+                showResult('imageResult', 'Uploading image to IPFS...', 'success');
+                
+                const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwt}`
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const ipfsHash = result.IpfsHash;
+                    const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+                    
+                    document.getElementById('imageHash').value = ipfsHash;
+                    
+                    showResult('imageResult', `
+                        <strong>✅ Image uploaded successfully!</strong><br>
+                        <strong>IPFS Hash:</strong> ${ipfsHash}<br>
+                        <strong>URL:</strong> <a href="${ipfsUrl}" target="_blank">${ipfsUrl}</a><br>
+                        <img src="${ipfsUrl}" style="max-width: 200px; margin-top: 10px;">
+                    `, 'success');
+                } else {
+                    showResult('imageResult', `Error: ${result.error || 'Upload failed'}`, 'error');
+                }
+            } catch (error) {
+                showResult('imageResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function uploadMetadata() {
+            const jwt = document.getElementById('jwtToken').value;
+            const name = document.getElementById('nftName').value;
+            const description = document.getElementById('nftDescription').value;
+            const imageHash = document.getElementById('imageHash').value;
+            
+            if (!jwt || !name || !description || !imageHash) {
+                showResult('metadataResult', 'Please fill all metadata fields', 'error');
+                return;
+            }
+
+            const metadata = {
+                name: name,
+                description: description,
+                image: `ipfs://${imageHash}`,
+                attributes: [
+                    {
+                        trait_type: "Type",
+                        value: "Custom NFT"
+                    },
+                    {
+                        trait_type: "Rarity",
+                        value: "Unique"
+                    }
+                ]
+            };
+
+            try {
+                showResult('metadataResult', 'Uploading metadata to IPFS...', 'success');
+                
+                const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    },
+                    body: JSON.stringify({
+                        pinataContent: metadata,
+                        pinataMetadata: {
+                            name: `${name} - Metadata`
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const metadataHash = result.IpfsHash;
+                    const metadataUrl = `https://gateway.pinata.cloud/ipfs/${metadataHash}`;
+                    
+                    showResult('metadataResult', `
+                        <strong>✅ Metadata uploaded successfully!</strong><br>
+                        <strong>IPFS Hash:</strong> ${metadataHash}<br>
+                        <strong>URL:</strong> <a href="${metadataUrl}" target="_blank">${metadataUrl}</a>
+                    `, 'success');
+
+                    showResult('finalResult', `
+                        <h4>🎉 Complete NFT Ready!</h4>
+                        <strong>Token URI for Contract:</strong><br>
+                        <code>ipfs://${metadataHash}</code><br><br>
+                        <strong>HTTP URL:</strong><br>
+                        <a href="${metadataUrl}" target="_blank">${metadataUrl}</a><br><br>
+                        <strong>Preview Metadata:</strong><br>
+                        <pre>${JSON.stringify(metadata, null, 2)}</pre>
+                    `, 'success');
+                } else {
+                    showResult('metadataResult', `Error: ${result.error || 'Upload failed'}`, 'error');
+                }
+            } catch (error) {
+                showResult('metadataResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
