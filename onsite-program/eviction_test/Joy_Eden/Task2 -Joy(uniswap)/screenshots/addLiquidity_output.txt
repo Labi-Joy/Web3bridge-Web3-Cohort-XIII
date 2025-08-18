@@ -1,0 +1,9 @@
+################### Initial Balance Info ###########################
+User Initial USDC Balance: 1465.295046
+User Initial DAI Balance: 472354.046319385248019296
+ProviderError: Transaction maxFeePerGas (529210682) is too low for the next block, which has a baseFeePerGas of 21873910294
+    at EdrProviderWrapper.request (/home/labidev/EVICTION-TESTS/Task2 -Joy(uniswap)/node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:368:19)
+    at async HardhatEthersSigner.sendTransaction (/home/labidev/EVICTION-TESTS/Task2 -Joy(uniswap)/node_modules/@nomicfoundation/hardhat-ethers/src/signers.ts:181:18)
+    at async send (/home/labidev/EVICTION-TESTS/Task2 -Joy(uniswap)/node_modules/ethers/src.ts/contract/contract.ts:313:20)
+    at async Proxy.approve (/home/labidev/EVICTION-TESTS/Task2 -Joy(uniswap)/node_modules/ethers/src.ts/contract/contract.ts:352:16)
+    at async main (/home/labidev/EVICTION-TESTS/Task2 -Joy(uniswap)/scripts/addLiquidity.ts:29:24)
