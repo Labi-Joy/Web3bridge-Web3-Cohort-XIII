@@ -1,0 +1,30 @@
+{
+  "name": "task1-joy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat run scripts/deploy-and-interact.js",
+    "deploy:localhost": "npx hardhat run scripts/deploy-and-interact.js --network localhost",
+    "deploy:sepolia": "npx hardhat run scripts/deploy-production.js --network sepolia",
+    "deploy:mainnet": "npx hardhat run scripts/deploy-production.js --network mainnet",
+    "deploy:polygon": "npx hardhat run scripts/deploy-production.js --network polygon",
+    "deploy:mumbai": "npx hardhat run scripts/deploy-production.js --network mumbai",
+    "deploy:bsc": "npx hardhat run scripts/deploy-production.js --network bsc",
+    "deploy:bsc-testnet": "npx hardhat run scripts/deploy-production.js --network bscTestnet",
+    "verify": "npx hardhat run scripts/verify-contract.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/node": "^24.3.0",
+    "dotenv": "^17.2.1",
+    "hardhat": "^2.22.15",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
